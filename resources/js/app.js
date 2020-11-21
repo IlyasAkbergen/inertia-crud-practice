@@ -7,11 +7,13 @@ import Vue from 'vue';
 import { InertiaApp } from '@inertiajs/inertia-vue';
 import { InertiaForm } from 'laravel-jetstream';
 import PortalVue from 'portal-vue';
+import FlashMessage from '@smartweb/vue-flash-message';
 
 Vue.mixin({ methods: { route } });
 Vue.use(InertiaApp);
 Vue.use(InertiaForm);
 Vue.use(PortalVue);
+Vue.use(FlashMessage);
 
 const app = document.getElementById('app');
 

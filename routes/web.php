@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\MovieController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,3 +22,8 @@ Route::get('/', function () {
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
     return Inertia\Inertia::render('Dashboard');
 })->name('dashboard');
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::resource('movies', MovieController::class);
+    Route::resource('reviews', ReviewController::class);
+});

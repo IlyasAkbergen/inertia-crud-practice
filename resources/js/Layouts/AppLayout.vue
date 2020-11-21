@@ -207,6 +207,8 @@
         <!-- Modal Portal -->
         <portal-target name="modal" multiple>
         </portal-target>
+
+        <FlashMessage :position="'right top'"></FlashMessage>
     </div>
 </template>
 
