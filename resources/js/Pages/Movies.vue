@@ -36,9 +36,11 @@
                 <p>Rating: {{ movie.average_stars ? movie.average_stars : 0 }} / 5.0</p>
                 <p>Reviews count: {{ movie.reviews_count }}</p>
               </div>
-              <div class="ml-12" v-for="review in movie.reviews">
-                <div class="mt-2 text-sm text-gray-500">
-                  {{ movie.description }}
+              <div class="col-span-6 sm:col-span-4">
+                <div class="ml-12" v-for="review in movie.reviews">
+                  <div class="mt-2 text-sm text-gray-500">
+                    {{ review.stars + " - " + review.note }}
+                  </div>
                 </div>
               </div>
             </template>
@@ -50,30 +52,11 @@
               <JetButton @click.native="deleteMovie(movie)" class="mr-2">
                 Delete
               </JetButton>
-              <JetButton @click="openReviewModal(movie)">
+              <JetButton @click.native="openReviewModal(movie)">
                 Rate
               </JetButton>
             </template>
           </FormSection>
-
-          <div class="bg-gray-200 bg-opacity-25 grid grid-cols-1 md:grid-cols-2">
-            <div class="p-6 border-t border-gray-200 md:border-t-0 md:border"
-                 v-for="movie in movies">
-
-              <div class="flex items-center">
-                <div class="ml-4 text-lg text-gray-600 leading-7 font-semibold">
-                  <span>{{ movie.title }}</span>
-                </div>
-              </div>
-
-              <div class="ml-12">
-                <div class="mt-2 text-sm text-gray-500">
-                  {{ movie.description }}
-                </div>
-              </div>
-
-            </div>
-          </div>
 
           <DialogModal :show="isOpen" @close="closeModal">
             <template #title>{{ editMode ? "Edit" : "New" }} Movie</template>
@@ -115,15 +98,23 @@
           <DialogModal :show="reviewModalOpen" @close="closeReviewForm">
             <template #title>Review form</template>
 
-            <template>
-              <JetInput type="text"
-                        v-model="form.title"
-                        @keyup.enter.native="submitForm(form)" />
+            <template #content>
+              <label for="stars" class="block text-gray-700 text-sm font-bold mb-2">Stars: </label>
+              <JetInput type="number"
+                        id="stars"
+                        min="0"
+                        max="5"
+                        v-model="reviewForm.stars"/>
 
               <div class="mt-2">
                 <label for="exampleFormControlInput2" class="block text-gray-700 text-sm font-bold mb-2">
-                  Description:
+                  Review:
                 </label>
+                <textarea class="shadow appearance-none border rounded w-full py-2 px-3
+                              text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          id="exampleFormControlInput2"
+                          v-model="reviewForm.note"
+                          placeholder="Enter Review Text" />
               </div>
 
               <div class="mb-4">
@@ -135,7 +126,7 @@
                 Cancel
               </jet-secondary-button>
 
-              <jet-button class="ml-2" @click.native="submitForm(reviewForm)"
+              <jet-button class="ml-2" @click.native="submitReviewForm(reviewForm)"
                           :class="{ 'opacity-25': reviewForm.processing }"
                           :disabled="reviewForm.processing">
                 Save
@@ -180,6 +171,7 @@
           error: ''
         },
         reviewForm: {
+          reviewable_id: null,
           note: '',
           stars: 0,
           error: '',
@@ -228,7 +220,8 @@
           error: ''
         }
       },
-      openReviewModal() {
+      openReviewModal(movie) {
+        this.reviewForm.reviewable_id = movie.id;
         this.reviewModalOpen = true;
       },
       closeReviewForm() {
@@ -240,7 +233,19 @@
           note: '',
           stars: 0,
           error: '',
+          reviewable_id: null,
         }
+      },
+      submitReviewForm (review) {
+        this.$inertia.post('/reviews', review)
+          .then(() => {
+            this.resetReviewForm();
+            this.closeReviewForm();
+          })
+          .catch(() => {
+            this.resetReviewForm();
+            this.closeReviewForm();
+          });
       },
       submitForm: function (data) {
         this.editMode ? this.update(data) : this.save(data)

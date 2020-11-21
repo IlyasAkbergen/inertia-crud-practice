@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Events\MovieUpdated;
 use App\Events\ReviewCreated;
 use App\Events\ReviewDeleted;
 use App\Events\ReviewUpdated;
@@ -15,16 +14,17 @@ class Review extends Model
 
     static $MORPH_NAME = 'reviewable';
 
+    protected $fillable = [
+        'note', 'user_id', 'reviewable_id', 'reviewable_type', 'stars'
+    ];
+
     public function reviewable()
     {
         return $this->morphTo();
     }
 
     protected $dispatchesEvents = [
-        'created' => [
-            ReviewCreated::class,
-            MovieUpdated::class
-        ],
+        'created' => ReviewCreated::class,
         'updated' => ReviewUpdated::class,
         'deleted' => ReviewDeleted::class,
     ];

@@ -2,13 +2,15 @@
 
 namespace App\Events;
 
+use App\Models\Movie;
 use App\Models\Review;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ReviewCreated implements ShouldBroadcast
+class ReviewCreated implements ShouldBroadcast, ShouldQueue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,6 +24,11 @@ class ReviewCreated implements ShouldBroadcast
     public function __construct(Review $review)
     {
         $this->review = $review;
+        $review->load('reviewable');
+
+        if ($review->reviewable == Movie::class) {
+            event(new MovieUpdated($review->reviewable));
+        }
     }
 
     /**
